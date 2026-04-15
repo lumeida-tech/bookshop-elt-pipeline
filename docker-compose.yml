@@ -1,0 +1,142 @@
+version: '3.8'
+
+# Configuration partagée entre tous les services Airflow
+x-airflow-common: &airflow-common
+  build: ./airflow
+  env_file: .env
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: 'ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg='
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__WEBSERVER__SECRET_KEY: 'bookshop_secret_key'
+    POSTGRES_HOST: postgres-source
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./dbt:/opt/dbt
+    - ./ingestion/ingest.py:/opt/airflow/scripts/ingest.py
+    - airflow_logs:/opt/airflow/logs
+  depends_on:
+    postgres-airflow:
+      condition: service_healthy
+  networks:
+    - bookshop_network
+
+services:
+
+  # ──────────────────────────────────────────────
+  # PostgreSQL SOURCE
+  # La base de données locale avec les données brutes
+  # ──────────────────────────────────────────────
+  postgres-source:
+    image: postgres:15
+    container_name: bookshop_postgres_source
+    env_file: .env
+    environment:
+      POSTGRES_DB: bookshop_source
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_source_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - bookshop_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "bookshop", "-d", "bookshop_source"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────
+  # PostgreSQL AIRFLOW
+  # Base interne utilisée par Airflow pour stocker ses données
+  # ──────────────────────────────────────────────
+  postgres-airflow:
+    image: postgres:15
+    container_name: bookshop_postgres_airflow
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - postgres_airflow_data:/var/lib/postgresql/data
+    networks:
+      - bookshop_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────
+  # AIRFLOW INIT
+  # Lance une seule fois pour initialiser Airflow
+  # ──────────────────────────────────────────────
+  airflow-init:
+    <<: *airflow-common
+    container_name: bookshop_airflow_init
+    command: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create --username admin --password admin --firstname Admin --lastname Bookshop --role Admin --email admin@bookshop.com &&
+        echo 'Airflow ready!'
+      "
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "airflow users list | grep admin || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ──────────────────────────────────────────────
+  # AIRFLOW WEBSERVER
+  # Interface web → http://localhost:8080
+  # Login : admin / admin
+  # ──────────────────────────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: bookshop_airflow_webserver
+    command: airflow webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # ──────────────────────────────────────────────
+  # AIRFLOW SCHEDULER
+  # Lance les DAGs automatiquement
+  # ──────────────────────────────────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: bookshop_airflow_scheduler
+    command: airflow scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # ──────────────────────────────────────────────
+  # METABASE
+  # Dashboard de visualisation → http://localhost:3000
+  # ──────────────────────────────────────────────
+  metabase:
+    image: metabase/metabase:latest
+    container_name: bookshop_metabase
+    ports:
+      - "3000:3000"
+    volumes:
+      - metabase_data:/metabase-data
+    networks:
+      - bookshop_network
+
+networks:
+  bookshop_network:
+    driver: bridge
+
+volumes:
+  postgres_source_data:
+  postgres_airflow_data:
+  airflow_logs:
+  metabase_data:

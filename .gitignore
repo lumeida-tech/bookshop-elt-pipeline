@@ -1,0 +1,16 @@
+# Credentials - ne jamais commiter
+.env
+
+# DBT
+dbt/bookshop/target/
+dbt/bookshop/dbt_packages/
+dbt/bookshop/logs/
+dbt/.user.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store

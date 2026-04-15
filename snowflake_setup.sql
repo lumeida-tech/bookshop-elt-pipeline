@@ -1,0 +1,49 @@
+-- ============================================================
+-- SNOWFLAKE SETUP - A exécuter UNE SEULE FOIS en tant qu'ACCOUNTADMIN
+-- ============================================================
+
+USE ROLE ACCOUNTADMIN;
+
+-- ──────────────────────────────────────────────────────────
+-- 1. CRÉER LA BASE DE DONNÉES
+-- ──────────────────────────────────────────────────────────
+CREATE DATABASE IF NOT EXISTS BOOKSHOP;
+
+-- ──────────────────────────────────────────────────────────
+-- 2. CRÉER LES 4 SCHÉMAS
+-- ──────────────────────────────────────────────────────────
+CREATE SCHEMA IF NOT EXISTS BOOKSHOP.RAW;
+CREATE SCHEMA IF NOT EXISTS BOOKSHOP.STAGGING;
+CREATE SCHEMA IF NOT EXISTS BOOKSHOP.WAREHOUSE;
+CREATE SCHEMA IF NOT EXISTS BOOKSHOP.MARTS;
+
+-- ──────────────────────────────────────────────────────────
+-- 3. DONNER TOUS LES DROITS À SYSADMIN
+-- ──────────────────────────────────────────────────────────
+GRANT ALL PRIVILEGES ON DATABASE BOOKSHOP TO ROLE SYSADMIN;
+
+GRANT ALL PRIVILEGES ON SCHEMA BOOKSHOP.RAW       TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON SCHEMA BOOKSHOP.STAGGING  TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON SCHEMA BOOKSHOP.WAREHOUSE TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON SCHEMA BOOKSHOP.MARTS     TO ROLE SYSADMIN;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA BOOKSHOP.RAW       TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA BOOKSHOP.STAGGING  TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA BOOKSHOP.WAREHOUSE TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA BOOKSHOP.MARTS     TO ROLE SYSADMIN;
+
+-- Pour les tables créées dans le futur (par DBT)
+GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA BOOKSHOP.RAW       TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA BOOKSHOP.STAGGING  TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA BOOKSHOP.WAREHOUSE TO ROLE SYSADMIN;
+GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA BOOKSHOP.MARTS     TO ROLE SYSADMIN;
+
+-- ──────────────────────────────────────────────────────────
+-- 4. DONNER LE RÔLE SYSADMIN À TON UTILISATEUR
+-- ──────────────────────────────────────────────────────────
+GRANT ROLE SYSADMIN TO USER LuMeiDa;
+
+-- ──────────────────────────────────────────────────────────
+-- 5. VÉRIFICATION : affiche les schémas créés
+-- ──────────────────────────────────────────────────────────
+SHOW SCHEMAS IN DATABASE BOOKSHOP;

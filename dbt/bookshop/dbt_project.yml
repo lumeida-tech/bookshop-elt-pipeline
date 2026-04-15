@@ -1,0 +1,29 @@
+name: 'bookshop'
+version: '1.0.0'
+config-version: 2
+
+# Nom du profil dans profiles.yml
+profile: 'bookshop'
+
+# Dossiers du projet
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+# Dossier de compilation (généré automatiquement, ne pas modifier)
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuration des modèles par dossier
+models:
+  bookshop:
+    staging:
+      +materialized: table
+      +schema: STAGGING
+    warehouse:
+      +materialized: table
+      +schema: WAREHOUSE
+    marts:
+      +materialized: table
+      +schema: MARTS
