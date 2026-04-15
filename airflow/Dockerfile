@@ -1,12 +1,5 @@
 FROM apache/airflow:2.8.1-python3.11
 
-USER root
-
-# Installer les dépendances système
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean
-
 USER airflow
 
 # Installer DBT + connecteurs Python
