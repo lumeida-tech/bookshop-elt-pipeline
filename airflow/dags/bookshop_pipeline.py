@@ -24,7 +24,7 @@ default_args = {
 }
 
 DBT_DIR = '/opt/dbt/bookshop'
-DBT_PROFILES_DIR = '/opt/dbt'
+DBT_PROFILES_DIR = '/home/airflow/.dbt'
 
 # ──────────────────────────────────────────────────────
 # Définition du DAG
