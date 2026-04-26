@@ -52,7 +52,7 @@ with DAG(
     # ──────────────────────────────────────────────────
     dbt_staging = BashOperator(
         task_id='dbt_staging',
-        bash_command=f'cd {DBT_DIR} && dbt run --profiles-dir {DBT_PROFILES_DIR} --select staging',
+        bash_command=f'cd {DBT_DIR} && dbt run --profiles-dir {DBT_PROFILES_DIR} --log-path /tmp --select staging',
     )
 
     # ──────────────────────────────────────────────────
@@ -60,7 +60,7 @@ with DAG(
     # ──────────────────────────────────────────────────
     dbt_warehouse = BashOperator(
         task_id='dbt_warehouse',
-        bash_command=f'cd {DBT_DIR} && dbt run --profiles-dir {DBT_PROFILES_DIR} --select warehouse',
+        bash_command=f'cd {DBT_DIR} && dbt run --profiles-dir {DBT_PROFILES_DIR} --log-path /tmp --select warehouse',
     )
 
     # ──────────────────────────────────────────────────
@@ -68,7 +68,7 @@ with DAG(
     # ──────────────────────────────────────────────────
     dbt_marts = BashOperator(
         task_id='dbt_marts',
-        bash_command=f'cd {DBT_DIR} && dbt run --profiles-dir {DBT_PROFILES_DIR} --select marts',
+        bash_command=f'cd {DBT_DIR} && dbt run --profiles-dir {DBT_PROFILES_DIR} --log-path /tmp --select marts',
     )
 
     # ──────────────────────────────────────────────────

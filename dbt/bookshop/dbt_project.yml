@@ -10,7 +10,7 @@ model-paths: ["models"]
 macro-paths: ["macros"]
 
 # Dossier de compilation (généré automatiquement, ne pas modifier)
-target-path: "target"
+target-path: "/tmp/dbt_target"
 clean-targets:
   - "target"
   - "dbt_packages"

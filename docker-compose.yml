@@ -15,8 +15,6 @@ x-airflow-common: &airflow-common
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./dbt:/opt/dbt
-    - dbt_target:/opt/dbt/bookshop/target
-    - dbt_logs:/opt/dbt/bookshop/logs
     - ./dbt/profiles.yml:/home/airflow/.dbt/profiles.yml
     - ./ingestion/ingest.py:/opt/airflow/scripts/ingest.py
     - airflow_logs:/opt/airflow/logs
@@ -143,5 +141,3 @@ volumes:
   postgres_airflow_data:
   airflow_logs:
   metabase_data:
-  dbt_target:
-  dbt_logs:
