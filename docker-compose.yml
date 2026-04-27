@@ -12,6 +12,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__WEBSERVER__SECRET_KEY: 'bookshop_secret_key'
     POSTGRES_HOST: postgres-source
+    DBT_TARGET_PATH: /tmp/dbt_target
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./dbt:/opt/dbt
